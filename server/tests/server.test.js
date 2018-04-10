@@ -1,5 +1,6 @@
-const expect = require('expect')
+const expect = require('expect');
 const request = require('supertest');
+
 
 const {app} = require('./../server.js');
 const {Todo} = require('./../models/todo');
@@ -7,11 +8,13 @@ const {ObjectID} = require('mongodb');
 
 const todos = [{
     _id:   new ObjectID(),
-    text: 'First test todo'
+    text: 'First test todo',
 },
 {
     _id:  new ObjectID(),
-    text: 'Second test todo'
+    text: 'Second test todo',
+    completed: true,
+    completedAt:  44400
 }];
 
 beforeEach((done) => {
@@ -66,6 +69,7 @@ it('should not create a todo if the body details are invalid', (done) => {
 })
 });
 
+
 describe('GET/Todos',() =>{
     it('Should return all todos', (done) => {
         request(app)
@@ -117,7 +121,7 @@ if (err) {
     return done(err);
 }
 Todo.findById(hexId).then( (todo) => {
-expect(todo).toNotExist();
+expect(todo).toBeNull();
 done();
 }).catch( (e) =>  done(e));
 });
@@ -136,5 +140,39 @@ it('should return 404 if ID not valid ', (done) => {
     .delete(`/todos/${Id}`)
     .expect(404)
     .end(done)
+});
+});
+
+describe('PATCH/todos/:id',() => {
+    it('should update the todo',(done)=> {
+        HexId = todos[0]._id.toHexString();
+        var updatedText = 'Updated Text';
+        request(app)
+        .patch(`/todos/${HexId}`)
+        .send({
+            'text': updatedText,
+            'completed': true,
+          })
+        .expect(200)
+        .expect((res) => {
+            expect(res.body.todo.completed).toBe(true);
+            expect(res.body.todo.text).toBe(updatedText);
+            expect(res.body.todo.completedAt).toEqual(expect.any(Number));
+            
+        }).end(done);
+    });
+it('should clear completeAt when todo is not completed',(done)=>{
+    HexId = todos[1]._id.toHexString();
+    request(app)
+    .patch(`/todos/${HexId}`)
+    .send({
+        'completed': false,
+      })
+    .expect(200)
+    .expect( (res) =>{
+        expect(res.body.todo.completedAt).toBeNull();
+        console.log(res.body.todo.completedAt);
+        done();
+    }).catch((e) => done(e));
 });
 });
