@@ -89,8 +89,11 @@ res.send({todo});
     console.log('AuthToken: ',AuthToken);
      return AuthToken; 
   }).then((token) => {
+    console.log('got to send part');
+
     res.header('x-auth',token).send(user);
-  }).catch((e) => {    
+  }).catch((e) => {   
+    console.log('error', e); 
     res.status(400).send(e);
   });
 });

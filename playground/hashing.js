@@ -1,11 +1,20 @@
+
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
-var data = {
-id: 10
-}
+var password = '123abc!';
 
-token = jwt.sign(data,'123abc');
-console.log(token);
+bcrypt.genSalt(10, (err,salt) => {
+    bcrypt.hash(password,salt,(err,hash) =>{
+    console.log(hash);
+    });
+});
+// var data = {
+// id: 10
+// }
 
-decoded = jwt.verify(token,'123abc');
-console.log('Decoded: ',decoded);
+// token = jwt.sign(data,'123abc');
+// console.log(token);
+
+// decoded = jwt.verify(token,'123abc');
+// console.log('Decoded: ',decoded);
