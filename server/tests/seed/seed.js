@@ -31,7 +31,7 @@ const todos = [{
 }]
 
 const  populateTodos = (done) => {
-    console.log('inseerting todos');
+
     Todo.remove({}).then(() => {
          Todo.insertMany(todos);
      }).then( () => done());

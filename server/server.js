@@ -82,7 +82,7 @@ res.send({todo});
  })
  app.post('/users', (req,res) => {
   var body = _.pick(req.body, ['email','password']);
-  console.log('body: ',body);
+  
   var user = new User(body);
   user.save().then(() => {
     var AuthToken = user.generateAuthToken(); 
@@ -91,7 +91,7 @@ res.send({todo});
 
     res.header('x-auth',token).send(user);
   }).catch((e) => {   
-    console.log('error', e); 
+     
     res.status(400).send(e);
   });
 });

@@ -46,16 +46,12 @@ it('should not create a todo if the body details are invalid', (done) => {
        Todo.find({}).then( (todos) => {
            expect(todos.length).toBe(2);
            done();
-       }
-    , (e) => {
-        console.log(e);
-    }).catch((e) => {
-        console.log('caught error');
-        done(e);
+       }).catch((e) => done(e));    
+    });
 });
 })
-})
-});
+
+
 
 
 describe('GET/Todos',() =>{
@@ -159,7 +155,7 @@ it('should clear completeAt when todo is not completed',(done)=>{
     .expect(200)
     .expect( (res) =>{
         expect(res.body.todo.completedAt).toBeNull();
-        console.log(res.body.todo.completedAt);
+        
         done();
     }).catch((e) => done(e));
 });
@@ -208,7 +204,7 @@ describe('POST /users', () => {
                expect(user).toBeTruthy();
                expect(user.password).not.toBe(password);
                done();
-           });
+           }).catch ((e) => done(e));
         });
     
 });
@@ -232,4 +228,52 @@ it('should not save user if email already used', (done) => {
     .expect(400)
     .end(done);
 });
+});
+
+describe('POST/users/login', () =>{
+    it('It should login user and return with Auth token', (done) =>{
+        request(app)
+        .post('/users/login')
+        .send( {
+            email: users[1].email,
+            password: users[1].password
+        })
+        .expect(200)
+        .expect((res) => {
+            expect(res.headers['x-auth']).toBeTruthy();
+         
+        }).end((err, res) => {
+            if (err) {
+                return done(err);
+            }
+            User.findById(users[1]._id).then((user) => {
+                expect(user.tokens[0]).toMatchObject({
+                    access: 'auth',
+                    token:   res.headers['x-auth']
+                });
+                done();
+            }).catch ((e) => done(e));
+        });
+    });
+    it('should reject invalid login',(done) => {
+        request(app)
+        .post('/users/login')
+        .send( {
+            email: users[1].email,
+            password: users[1].password + 'a'
+        })
+        .expect(400)
+        .expect((res) => {
+            expect(res.headers['x-auth']).toBeFalsy();
+         
+        }).end((err, res) => {
+            if (err) {
+                return done(err);
+            }
+            User.findById(users[1]._id).then((user) => {
+                expect(user.tokens.length).toBe(0);
+                done();
+            }).catch ((e) => done(e));
+        });
+    });
 });
